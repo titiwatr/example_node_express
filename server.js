@@ -1,5 +1,15 @@
+const fs = require('fs')
 const express = require('express')
+const http = require('http')
+const https = require('https')
+
+const key = fs.readFileSync('./sslcert/selfsigned2.key')
+const cert = fs.readFileSync('./sslcert/selfsigned2.crt')
+const port = process.env.PORT || 3000
+const securePort = process.env.SECURE_PORT || 3443
+
 const app = express()
+
 const userRouter = require('./routers/users')
 
 // set view engine to use ejs
@@ -64,5 +74,19 @@ app.get('/redirected', (req, res) => {
     res.send('you have been redirected to this page.')
 })
 
+
+
+const httpServer = http.createServer(app)
+
+const httpsServer = https.createServer({key: key, cert: cert}, app)
+
+httpServer.listen(port, () => {
+    console.log(`server started on port ${port}`)
+})
+
+httpsServer.listen(securePort, () => {
+    console.log(`secured server started on port ${securePort}`)
+})
+
 // start server
-app.listen(3000)
+// app.listen(3000)
